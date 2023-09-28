@@ -40,3 +40,16 @@ The required technologies will be used in the following ways.
 - **Login** - Register and login users. Credentials securely stored in database. Can't view / edit soundboard unless logged in and are added to the soundboard.
 - **WebSocket** - As a soundboard is edited, all changes will be broadcast to other users of that soundboard.
 - **React** - Application will eventually use the React framework
+
+## HTML Deliverable
+For this deliverable I built out the structure of the application in HTML
+- **HTML Pages** - Login, About, Soundboards (dashboard), and an example Soundboard page
+- **Links** - The login page automatically links to the Soundboards page. There is a navbar with links to all the pages
+- **Text** - The Soundboards and sounds within them are represented by a text-based depictions
+however they will be more colorful and structured when we do the css deliverable.
+- **Images** - There is an inspiring image on the about page for users to be inspired by
+- **Login** - Input box and submit button for username and password
+- **Database** - The soundboards will be stored in the database for each user
+- **External service** - The sounds themselves will be hosted on AWS S3
+- **WebSocket** - The sounds on each soundboard will update automatically on each client when
+changes are made by using WebSocket connections
