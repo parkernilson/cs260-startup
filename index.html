@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
   <head>
     <meta charset="UTF-8" />
     <!-- Tell browsers not to scale the viewport automatically -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Storyteller</title>
     <link rel="icon" href="favicon.ico" />
+    <link rel="stylesheet" href="main.css" />
     <link rel="stylesheet" href="https://use.typekit.net/nnz5oac.css">
     <script src="https://kit.fontawesome.com/0096c0936f.js" crossorigin="anonymous"></script>
     <script src="tailwindcss.js"></script>
@@ -20,32 +21,39 @@
       }
     </script>
   </head>
-  <body>
-    <header>
+  <body class="h-full flex flex-col">
+    <header class="
+      flex items-center justify-center text-4xl bg-blue-100
+      h-24
+    ">
       <h1 class="font-display">Storyteller</h1>
-      <h2>Link to github repo: <a href="https://github.com/parkernilson/cs260-startup">Startup Repo</a></h2>
-      <nav>
-        <menu>
-          <li><a href="index.html">Log in</a></li>
-          <li><a href="soundboards.html">Soundboards</a></li>
-          <li><a href="soundboard1.html">Example Soundboard</a></li>
-          <li><a href="about.html">About</a></li>
-        </menu>
-      </nav>
-
-      <hr />
     </header>
 
-    <main>
-      <h1>Welcome</h1>
-      <p>Login to play</p>
-      <form method="get" action="soundboards.html">
-        <label for="name">Username</label>
-        <input type="text" id="name" placeholder="Username" />
-        <label for="password">Password</label>
-        <input type="password" id="password" placeholder="Password" />
-        <button type="submit">Login</button>
-      </form>
+    <main class="flex-1 flex items-center justify-center">
+      <div class="
+        shadow-md rounded-sm border border-black
+        px-8
+        py-4
+        flex flex-col items-center
+        w-full max-w-md
+      ">
+        <h1 class="font-body text-3xl mb-8">Welcome</h1>
+        <form method="get" action="soundboards.html" class="
+          w-full flex flex-col items-center
+        ">
+          <input type="text" id="name" placeholder="Username" class="
+            w-full mb-2 mx-3 px-3 border border-black rounded-sm
+          "/>
+          <input type="password" id="password" placeholder="Password" class="
+            w-full mb-2 mx-3 px-3 border border-black rounded-sm
+          "/>
+          <p class="self-end">Need an account? <a class="text-blue-500 hover:text-blue-600 cursor-pointer">Register here</a></p>
+          <button type="submit" class="
+            rounded-full px-5 border border-black
+            mt-8 bg-blue-100 hover:bg-blue-200
+          ">Login</button>
+        </form>
+      </div>
     </main>
 
     <footer>
