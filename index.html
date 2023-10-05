@@ -9,10 +9,20 @@
     <link rel="stylesheet" href="https://use.typekit.net/nnz5oac.css">
     <script src="https://kit.fontawesome.com/0096c0936f.js" crossorigin="anonymous"></script>
     <script src="tailwindcss.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          fontFamily: {
+            'display': ['"Superior Title"', 'serif'],
+            'body': ['"Brandon Grotesque"', 'Arial', 'sans-serif']
+          }
+        }
+      }
+    </script>
   </head>
   <body>
     <header>
-      <h1>Storyteller</h1>
+      <h1 class="font-display">Storyteller</h1>
       <h2>Link to github repo: <a href="https://github.com/parkernilson/cs260-startup">Startup Repo</a></h2>
       <nav>
         <menu>
