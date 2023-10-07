@@ -56,6 +56,11 @@ changes are made by using WebSocket connections
 
 ## CSS Deliverable
 For this deliverable I added CSS to structure and style the components of my application (although it is still not functional)
+
+NOTE: I have decided to use tailwindcss as my css framework, and until we start using `npm` I have to serve the entire tailwindcss
+library which makes my website load pretty slow. When we add `npm` I will be able to use the tailwind pre-compiler to drastically cut
+down the code shipped by tailwind to the client and it will load much faster!
+
 - **Header, Footer, Main content** - The Header prominently display app name in a nice font, body elements are centered on the page, and footer is visible, yet stylishly simple and uncluttered
 - **Navigation Elements** - Navigation is present in the header bar. The text wraps on smaller screens, which looks a little funny, but when we add javascript I will add a hamburger icon and a sidebar menu on smaller screens
 - **Responsive to window resizing** - The gallery components (i.e. Sounboards on the dashboard view, and sounds on the soundboard view) are in a responsive grid pattern. On larger screens there are 2 or 3 columns and on smaller screens there are 1 or 2 columns. Also sound boxes use the aspect ratio property to maintain square dimensions (wherever possible).
