@@ -10,18 +10,14 @@
     <link rel="stylesheet" href="https://use.typekit.net/nnz5oac.css">
     <script src="https://kit.fontawesome.com/0096c0936f.js" crossorigin="anonymous"></script>
     <script src="tailwindcss.js"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          fontFamily: {
-            'display': ['"Superior Title"', 'serif'],
-            'body': ['"Brandon Grotesque"', 'Arial', 'sans-serif']
-          }
-        }
-      }
-    </script>
+    <!-- My scripts -->
+    <script src="js/tailwind-config.js"></script>
+    <script src="js/util.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/modal.js"></script>
   </head>
-  <body class="h-full flex flex-col">
+  <body class="h-full flex flex-col" onload="loadDashboardPage()">
     <header class="
       flex justify-between items-center text-4xl bg-blue-100
       h-24 px-8
@@ -37,8 +33,6 @@
           <span class="w-0 border-l border-gray-400"></span>
           <li class="mx-2"><a href="soundboards.html">Soundboards</a></li>
           <span class="w-0 border-l border-gray-400"></span>
-          <li class="mx-2"><a href="soundboard1.html">Example</a></li>
-          <span class="w-0 border-l border-gray-400"></span>
           <li class="mx-2"><a href="about.html">About</a></li>
         </menu>
       </nav>
@@ -53,117 +47,67 @@
           font-display text-3xl font-light my-8
           self-center
         ">My Soundboards</h1>
-        <button class="self-end">Create a new soundboard</button>
+        <button class="self-end" onclick="showModal('create-soundboard-modal')">Create a new soundboard</button>
         <hr class="mb-6"/>
 
         <!-- Card grid -->
-        <div class="
+        <div id="board-container" class="
           grid grid-cols-1 sm:grid-cols-2 gap-4
         ">
-          <!-- Card 1 -->
-          <a href="soundboard1.html" class="
-            border border-black shadow-md rounded-sm
-            flex cursor-pointer
-          ">
-            <!-- Left section of card -->
-            <div class="
-              flex-1 flex items-center h-full
-              p-5
-            ">
-              <i class="fa-solid fa-dove fa-2xl mr-3"></i>
-              <div class="flex flex-col items-start">
-                <h2 class="font-display text-xl">Nature Scene</h2>
-                <p>3 Sounds</p>
-              </div>
-            </div>
-            <!-- Right sections of card -->
-            <div class="
-              flex flex-col
-              pr-2 pt-2
-            ">
-              <i class="fa-solid fa-ellipsis-vertical"></i>
-            </div>
-          </a>
-
-          <!-- Card 2 -->
-          <a href="soundboard1.html" class="
-            border border-black shadow-md rounded-sm
-            flex cursor-pointer
-          ">
-            <!-- Left section of card -->
-            <div class="
-              flex-1 flex items-center h-full
-              p-5
-            ">
-              <i class="fa-solid fa-shield fa-2xl mr-3"></i>
-              <div class="flex flex-col items-start">
-                <h2 class="font-display text-xl">Battle Sounds</h2>
-                <p>10 Sounds</p>
-              </div>
-            </div>
-            <!-- Right sections of card -->
-            <div class="
-              flex flex-col
-              pr-2 pt-2
-            ">
-              <i class="fa-solid fa-ellipsis-vertical"></i>
-            </div>
-          </a>
-
-          <!-- Card 3 -->
-          <a href="soundboard1.html" class="
-            border border-black shadow-md rounded-sm
-            flex cursor-pointer
-          ">
-            <!-- Left section of card -->
-            <div class="
-              flex-1 flex items-center h-full
-              p-5
-            ">
-              <i class="fa-solid fa-wand-sparkles fa-2xl mr-3"></i>
-              <div class="flex flex-col items-start">
-                <h2 class="font-display text-xl">Magic Sounds</h2>
-                <p>103 Sounds</p>
-              </div>
-            </div>
-            <!-- Right sections of card -->
-            <div class="
-              flex flex-col
-              pr-2 pt-2
-            ">
-              <i class="fa-solid fa-ellipsis-vertical"></i>
-            </div>
-          </a>
-
-          <!-- Card 4 -->
-          <a href="soundboard1.html" class="
-            border border-black shadow-md rounded-sm
-            flex cursor-pointer
-          ">
-            <!-- Left section of card -->
-            <div class="
-              flex-1 flex items-center h-full
-              p-5
-            ">
-              <i class="fa-solid fa-leaf fa-2xl mr-3"></i>
-              <div class="flex flex-col items-start">
-                <h2 class="font-display text-xl">Other Sounds</h2>
-                <p>Empty</p>
-              </div>
-            </div>
-            <!-- Right sections of card -->
-            <div class="
-              flex flex-col
-              pr-2 pt-2
-            ">
-              <i class="fa-solid fa-ellipsis-vertical"></i>
-            </div>
-          </a>
-
+          <!-- Cards will be inserted here by js -->
         </div>
 
       </div>
     </main>
+
+    <!-- Create soundboard modal -->
+    <dialog id="create-soundboard-modal">
+      <div class="flex flex-col items-center p-4">
+  
+        <h1 class="mt-3 mb-10 mx-8 text-3xl">Create a soundboard</h1>
+        <input placeholder="Title" id="new-board-title" class="w-full px-3 mb-4 border" />
+        <h2 class="text-lg mb-3">Icon:</h2>
+        <div class="grid grid-cols-4 gap-4 mb-8">
+          <div>
+            <input type="radio" id="wand-icon" name="icon" value="fa-wand-sparkles"/>
+            <label for="wand-icon"><i class="fa-solid fa-wand-sparkles fa-lg"></i></label>
+          </div>
+          <div>
+            <input type="radio" id="dove-icon" name="icon" value="fa-dove"/>
+            <label for="dove-icon"><i class="fa-solid fa-dove fa-lg"></i></label>
+          </div>
+          <div>
+            <input type="radio" id="shield-icon" name="icon" value="fa-shield"/>
+            <label for="shield-icon"><i class="fa-solid fa-shield fa-lg"></i></label>
+          </div>
+          <div>
+            <input type="radio" id="leaf-icon" name="icon" value="fa-leaf"/>
+            <label for="leaf-icon"><i class="fa-solid fa-leaf fa-lg"></i></label>
+          </div>
+          <div>
+            <input type="radio" id="fist-icon" name="icon" value="fa-hand-fist"/>
+            <label for="fist-icon"><i class="fa-solid fa-hand-fist fa-lg"></i></label>
+          </div>
+          <div>
+            <input type="radio" id="person-icon" name="icon" value="fa-person"/>
+            <label for="person-icon"><i class="fa-solid fa-person fa-lg"></i></label>
+          </div>
+          <div>
+            <input type="radio" id="house-icon" name="icon" value="fa-house"/>
+            <label for="house-icon"><i class="fa-solid fa-house fa-lg"></i></label>
+          </div>
+          <div>
+            <input type="radio" id="dog-icon" name="icon" value="fa-dog"/>
+            <label for="dog-icon"><i class="fa-solid fa-dog fa-lg"></i></label>
+          </div>
+        </div>
+  
+        <div class="flex justify-around w-full">
+          <button onclick="createBoardFromModal()" class="px-3 border hover:shadow-md">Create</button>
+          <button onclick="hideModal('create-soundboard-modal')">Close</button>
+        </div>
+      </div>
+    </dialog>
 
     <footer>
       <hr />
