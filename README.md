@@ -69,3 +69,17 @@ down the code shipped by tailwind to the client and it will load much faster!
 - **Application images** - The application does not use very many images, however FontAwesome is used for icons.
 - **Colors** - colors have been added to provide more variety
 - **Fonts** - 2 solid clean fonts have been chosen, one for headers and display text, the other for body
+
+## Javascript Deliverable
+
+- **Javascript Support for future login:** The user is able to log in, and their info will automatically be persisted in localStorage in the mock database. Multiple users can log in and the current user will be set in localStorage.
+
+- **Javascript for future database data:** All data is stored in a localStorage key called `db`. I have also created functions that access that `db` that will be adapted to work with the future db.
+
+- **Javascript support for future WebSocket:** I have created a function that takes incoming sound data and adds it to a given board. This will be called when the WebSocket sends add events.
+
+- **Javascript support for application interaction logic:** I have created functions to perform CRUD operations on the mock database. Each user has an array of boards and each board has an array of sounds. The UI is re-rendered to display this dynamic content.
+
+- **Sounds:** The user can click on sounds to play them back. They can also cancel them.
+
+- **Future support for external service (S3 Bucket for Uploading Sound Files):** Currently, it is not possible to add sound files because we have not implemented the file upload service. However, fake sounds can be added to sound boards.
