@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html class="h-full" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Tell browsers not to scale the viewport automatically -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Storyteller</title>
+    <link rel="icon" href="favicon.ico" />
+    <link rel="stylesheet" href="main.css" />
+    <link rel="stylesheet" href="https://use.typekit.net/nnz5oac.css">
+    <script src="https://kit.fontawesome.com/0096c0936f.js" crossorigin="anonymous"></script>
+    <script src="tailwindcss.js"></script>
+    <!-- My scripts -->
+    <script src="js/tailwind-config.js"></script>
+    <script src="js/util.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/modal.js"></script>
+    <script src="js/soundboard.js"></script>
+    <script>
+      var inboundSoundId = 0;
+    </script>
+  </head>
+  <body onload="loadSoundboardPage()" class="h-full flex flex-col">
+    <header class="
+      flex justify-between items-center text-4xl bg-blue-100
+      h-24 px-8
+    ">
+      <h1 class="font-display">Storyteller</h1>
+
+      <nav>
+        <menu class="
+          flex justify-between flex-wrap
+          text-lg
+        ">
+          <li class="mx-2"><a href="index.html">Log in</a></li>
+          <span class="w-0 border-l border-gray-400"></span>
+          <li class="mx-2"><a href="soundboards.html">Soundboards</a></li>
+          <span class="w-0 border-l border-gray-400"></span>
+          <li class="mx-2"><a href="about.html">About</a></li>
+        </menu>
+      </nav>
+
+    </header>
+    <hr />
+
+    <main class="flex-1 flex flex-col items-center">
+      <!-- Center column -->
+      <div class="w-full max-w-lg flex flex-col px-3">
+        <div id="sound-board-header" class="flex items-center self-center">
+          <i class="fa-solid fa-dove fa-xl mr-2"></i>
+          <h1 class="
+            font-display text-3xl font-light my-8
+            self-center
+          ">Untitled</h1>
+        </div>
+        <button class="self-end" onclick="showModal('add-sound-modal')">Add new sound</button>
+        <hr class="mb-6"/>
+
+        <!-- Card grid: cards will be added by javascript -->
+        <div id="sound-card-grid" class="
+          grid grid-cols-2 sm:grid-cols-3 gap-4
+        "></div>
+      </div>
+    </main>
+
+    <!-- Create soundboard modal -->
+    <dialog id="add-sound-modal">
+      <div class="flex flex-col items-center p-4">
+  
+        <h1 class="mt-3 mb-10 mx-8 text-3xl">Add a sound</h1>
+        <input placeholder="Name" id="new-board-title" class="w-full px-3 mb-4 border" />
+        <label for="sound-file">Sound File</label>
+        <input name="sound-file" type="file" class="mb-3" ></input>
+        <label for="sound-color">Color</label>
+        <input name="sound-color" type="color" class="mb-8"></input>
+  
+        <div class="flex justify-around w-full">
+          <button onclick="addSoundFromModal()" class="px-3 border hover:shadow-md">Add</button>
+          <button onclick="hideModal('add-sound-modal')">Close</button>
+        </div>
+      </div>
+    </dialog>
+
+    <div class="w-full flex justify-center mb-3 hover:text-blue-600">
+      <button class="text-xl px-3 mt-8 mb-8 border shadow-md" onclick="
+        inboundSoundAddEvent({
+          id: uuid(),
+          name: [`Inbound Sound ${inboundSoundId++}`],
+          color: ['bg-blue-300', 'bg-orange-300', 'bg-green-300', 'bg-purple-300', 'bg-yellow-300'][Math.floor(Math.random() * 5)],
+          url: 'default-url.com',
+          filename: 'default-filename.mp3'
+        })
+      ">Simulate Websocket Add Sound Event</button>
+    </div>
+
+    <footer>
+      <hr />
+      <div class="flex justify-center items-center">
+        <span class="text-reset mr-2">Parker Nilson</span>
+        <a href="https://github.com/parkernilson">
+          <i class="fa-brands fa-github"></i>
+          GitHub
+        </a>
+      </div>
+    </footer>
+  </body>
+</html>
