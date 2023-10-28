@@ -83,3 +83,5 @@ down the code shipped by tailwind to the client and it will load much faster!
 - **Sounds:** The user can click on sounds to play them back. They can also cancel them.
 
 - **Future support for external service (S3 Bucket for Uploading Sound Files):** Currently, it is not possible to add sound files because we have not implemented the file upload service. However, fake sounds can be added to sound boards.
+
+- **Customizable icons and colors:** Sounds and soundboards are fully customizable with icons and colors
