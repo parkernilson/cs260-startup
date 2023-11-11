@@ -37,6 +37,7 @@ apiRouter.get("/:username/boards", (req, res) => {
 });
 
 apiRouter.get("/:username/boards/:boardId", (req, res) => {
+  const username = req.params.username
   if (!db[username])
     return res.status(404).json({ message: "That user cannot be found" });
   if (!db[username]?.boards)
@@ -48,10 +49,11 @@ apiRouter.get("/:username/boards/:boardId", (req, res) => {
   const boardId = req.params.boardId;
   const board = boards.find((b) => b.id === boardId);
 
-  return res.status(200).json(board);
+  return res.status(200).json({ board });
 });
 
 apiRouter.post("/:username/boards/set", (req, res) => {
+  const username = req.params.username
   if (!db[username])
     return res.status(404).json({ message: "That user cannot be found" });
   if (!db[username]?.boards)
@@ -69,6 +71,7 @@ apiRouter.post("/:username/boards/set", (req, res) => {
 });
 
 apiRouter.put("/:username/boards/add", (req, res) => {
+  const username = req.params.username
   if (!db[username])
     return res.status(404).json({ message: "That user cannot be found" });
   if (!db[username]?.boards)
@@ -88,6 +91,7 @@ apiRouter.put("/:username/boards/add", (req, res) => {
 });
 
 apiRouter.delete("/:username/boards/:boardId", (req, res) => {
+  const username = req.params.username
   if (!db[username])
     return res.status(404).json({ message: "That user cannot be found" });
   if (!db[username]?.boards)
@@ -103,6 +107,7 @@ apiRouter.delete("/:username/boards/:boardId", (req, res) => {
 });
 
 apiRouter.post("/:username/boards/:boardId/sounds/set", (req, res) => {
+  const username = req.params.username
   if (!db[username])
     return res.status(404).json({ message: "That user cannot be found" });
   if (!db[username]?.boards)
@@ -128,6 +133,7 @@ apiRouter.post("/:username/boards/:boardId/sounds/set", (req, res) => {
 });
 
 apiRouter.put("/:username/boards/:boardId/sounds/add", (req, res) => {
+  const username = req.params.username
   if (!db[username])
     return res.status(404).json({ message: "That user cannot be found" });
   if (!db[username]?.boards)
@@ -150,6 +156,7 @@ apiRouter.put("/:username/boards/:boardId/sounds/add", (req, res) => {
 });
 
 apiRouter.delete("/:username/boards/:boardId/sounds/:soundId", (req, res) => {
+  const username = req.params.username
   if (!db[username])
     return res.status(404).json({ message: "That user cannot be found" });
   if (!db[username]?.boards)
