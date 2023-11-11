@@ -27,6 +27,15 @@ async function setSoundBoards(username, boards) {
 }
 
 /**
+ * @returns {Promise<void>}
+ */
+async function deleteSoundBoard(username, boardId) {
+    return fetch(`/api/${username}/boards/${boardId}`, {
+        method: "DELETE",
+    })
+}
+
+/**
  * @returns {Promise<Sound[]>}
  */
 async function setSoundsOnBoard(username, boardId, sounds) {

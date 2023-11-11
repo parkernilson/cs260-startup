@@ -85,8 +85,6 @@ async function createBoardFromModal() {
 
 async function removeBoard(boardId) {
   const username = getCurrentUser()
-  const boards = await getSoundBoards(username)
-  const newBoards = boards.filter(b => b.id !== boardId)
-  await setSoundBoards(username, newBoards)
-  renderBoards(newBoards)
+  await deleteSoundBoard(username, boardId)
+  await loadDashboardPage()
 }
