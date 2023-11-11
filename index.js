@@ -16,7 +16,7 @@ app.use(express.static("public"));
 const apiRouter = express.Router();
 app.use(`/api`, apiRouter);
 
-apiRouter.post("/login-user/:username", (req, res) => {
+apiRouter.post("/:username/login", (req, res) => {
   const username = req.params.username;
   if (!db[username]) {
     db[username] = getDefaultUserInfo();
@@ -26,6 +26,7 @@ apiRouter.post("/login-user/:username", (req, res) => {
 });
 
 apiRouter.get("/:username/boards", (req, res) => {
+  const username = req.params.username
   if (!db[username])
     return res.status(404).json({ message: "That user cannot be found" });
   if (!db[username]?.boards)
@@ -179,4 +180,6 @@ app.listen(port, () => {
 /**
  * @type {DB}
  */
-let db = {};
+let db = {
+  defaultuser: getDefaultUserInfo()
+};
