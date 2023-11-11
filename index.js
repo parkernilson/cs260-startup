@@ -1,5 +1,5 @@
-const { getDefaultUserInfo } = require('./backend/utils')
-const express = require('express')
+const { getDefaultUserInfo } = require("./backend/utils");
+const express = require("express");
 
 const app = express();
 
@@ -10,24 +10,166 @@ const port = process.argv.length > 2 ? process.argv[2] : 3000;
 app.use(express.json());
 
 // Serve up the front-end static content hosting
-app.use(express.static('public'));
+app.use(express.static("public"));
 
 // Router for service endpoints
-var apiRouter = express.Router();
+const apiRouter = express.Router();
 app.use(`/api`, apiRouter);
 
-apiRouter.post('/login-user/:username', (req, res) => {
-  const username = req.params.username
+apiRouter.post("/login-user/:username", (req, res) => {
+  const username = req.params.username;
   if (!db[username]) {
-    db[username] = getDefaultUserInfo()
+    db[username] = getDefaultUserInfo();
   }
 
-  res.status(200).json(db[username])
-})
+  res.status(200).json(db[username]);
+});
+
+apiRouter.get("/:username/boards", (req, res) => {
+  if (!db[username])
+    return res.status(404).json({ message: "That user cannot be found" });
+  if (!db[username]?.boards)
+    return res.status(500).json({
+      message: "An internal server error has occurred. Please try again later",
+    });
+  return res.status(200).json(db[username]);
+});
+
+apiRouter.get("/:username/boards/:boardId", (req, res) => {
+  if (!db[username])
+    return res.status(404).json({ message: "That user cannot be found" });
+  if (!db[username]?.boards)
+    return res.status(500).json({
+      message: "An internal server error has occurred. Please try again later",
+    });
+
+  const boards = db[username].boards;
+  const boardId = req.params.boardId;
+  const board = boards.find((b) => b.id === boardId);
+
+  return res.status(200).json(board);
+});
+
+apiRouter.post("/:username/boards/set", (req, res) => {
+  if (!db[username])
+    return res.status(404).json({ message: "That user cannot be found" });
+  if (!db[username]?.boards)
+    return res.status(500).json({
+      message: "An internal server error has occurred. Please try again later",
+    });
+  if (!req.body.boards)
+    return res
+      .status(400)
+      .json({ message: "Invalid request body. Boards are required" });
+
+  db[username].boards = req.body.boards;
+
+  return res.status(201).json({ boards: db[username].boards });
+});
+
+apiRouter.put("/:username/boards/add", (req, res) => {
+  if (!db[username])
+    return res.status(404).json({ message: "That user cannot be found" });
+  if (!db[username]?.boards)
+    return res.status(500).json({
+      message: "An internal server error has occurred. Please try again later",
+    });
+  if (!req.body.board)
+    return res
+      .status(400)
+      .json({ message: "Invalid request body. Board is required" });
+
+  const newBoard = { ...req.body.board, id: uuid() };
+
+  db[username].boards.push(newBoard);
+
+  return res.status(201).json(newBoard);
+});
+
+apiRouter.delete("/:username/boards/:boardId", (req, res) => {
+  if (!db[username])
+    return res.status(404).json({ message: "That user cannot be found" });
+  if (!db[username]?.boards)
+    return res.status(500).json({
+      message: "An internal server error has occurred. Please try again later",
+    });
+
+  const boardId = req.params.boardId;
+  const newBoards = db[username].boards.filter((b) => b.id !== boardId);
+  db[username].boards = newBoards;
+
+  return res.sendStatus(204);
+});
+
+apiRouter.post("/:username/boards/:boardId/sounds/set", (req, res) => {
+  if (!db[username])
+    return res.status(404).json({ message: "That user cannot be found" });
+  if (!db[username]?.boards)
+    return res.status(500).json({
+      message: "An internal server error has occurred. Please try again later",
+    });
+  if (!req.body.sounds)
+    return res
+      .status(400)
+      .json({ message: "Invalid request: sounds are required" });
+
+  const boardId = req.params.boardId;
+  const board = db[username].boards.find((b) => b.id === boardId);
+
+  if (!board)
+    return res.status(404).json({ message: "That board does not exist" });
+
+  board.sounds = req.body.sounds;
+  db[username].boards[db[username].boards.findIndex((b) => b.id === boardId)] =
+    board;
+
+  return res.status(201).json({ sounds: board.sounds });
+});
+
+apiRouter.put("/:username/boards/:boardId/sounds/add", (req, res) => {
+  if (!db[username])
+    return res.status(404).json({ message: "That user cannot be found" });
+  if (!db[username]?.boards)
+    return res.status(500).json({
+      message: "An internal server error has occurred. Please try again later",
+    });
+  if (!req.body.sound)
+    return res
+      .status(400)
+      .json({ message: "Invalid request: sound is required" });
+
+  const boardId = req.params.boardId;
+  const boardIndex = db[username].boards.findIndex((b) => b.id === boardId);
+  const board = db[username].boards[boardIndex];
+
+  board.sounds.push(req.body.sound);
+  db[username].boards[boardIndex].sounds = board.sounds;
+
+  return res.status(201).json({ sound: req.body.sound });
+});
+
+apiRouter.delete("/:username/boards/:boardId/sounds/:soundId", (req, res) => {
+  if (!db[username])
+    return res.status(404).json({ message: "That user cannot be found" });
+  if (!db[username]?.boards)
+    return res.status(500).json({
+      message: "An internal server error has occurred. Please try again later",
+    });
+
+  const boardIndex = db[username].boards.findIndex(
+    (b) => b.id === req.params.boardId
+  );
+  const newSounds = db[username].boards[boardIndex].sounds.filter(
+    (s) => s.id !== req.params.soundId
+  );
+  db[username].boards[boardIndex].sounds = newSounds
+
+  return res.sendStatus(204)
+});
 
 // Return the application's default page if the path is unknown
 app.use((_req, res) => {
-  res.sendFile('index.html', { root: 'public' });
+  res.sendFile("index.html", { root: "public" });
 });
 
 app.listen(port, () => {
@@ -35,6 +177,6 @@ app.listen(port, () => {
 });
 
 /**
- * @type {DB} 
+ * @type {DB}
  */
-let db = {}
+let db = {};
