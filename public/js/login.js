@@ -1,13 +1,22 @@
 /**
  * Log in the given user
  * @param {string} username 
- * @returns 
+ * @returns {Promise<void>}
  */
-function login() {
+async function login() {
     const username = document.getElementById('username-input').value
 
     const currentUser = localStorage.getItem('currentUser')
     if (currentUser !== username) localStorage.setItem('currentUser', username)
 
-    window.location.href = 'soundboards.html'
+    try {
+        await fetch(`/api/${username}/login`, {
+            method: "POST"
+        })
+
+        window.location.href = 'soundboards.html'
+    } catch(error) {
+        console.error(error)
+    }
+
 }
