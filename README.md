@@ -85,3 +85,10 @@ down the code shipped by tailwind to the client and it will load much faster!
 - **Future support for external service (S3 Bucket for Uploading Sound Files):** Currently, it is not possible to add sound files because we have not implemented the file upload service. However, fake sounds can be added to sound boards.
 
 - **Customizable icons and colors:** Sounds and soundboards are fully customizable with icons and colors
+
+## Backend Service deliverable
+- **HTTP Service Using Node and Express:** I set up an express web server on node
+- **Front end served using express static middleware:** My front end files are served using express middleware
+- **Front end calls third party endpoints:** My plan was to use an AWS s3 bucket to host the sound files for sound boards, but I couldn't get it to work in the browser. I tried debugging it for like 5 hours, and kept getting a weird error. I ran out of time to get it to work, so I ended up putting a random quote on the about page that I get by calling an external api. I plan on getting the s3 bucket thing to work (or use a different service) for the next deliverable.
+- **Backend service endpoints:** My backend now performs all of the CRUD operations on sound boards and sounds through express endpoints
+- **Frontend calls endpoints:** My frontend calls the endpoints to get sound boards and sounds / update them / delete them
