@@ -74,8 +74,8 @@ async function getSoundboard(username, boardId) {
  * @returns {Promise<void>}
  */
 async function removeSoundFromBoard(boardId, soundId) {
-    return fetch(`/api/${username}/boards/${boardId}`, {
+    const username = getCurrentUser()
+    return fetch(`/api/${username}/boards/${boardId}/sounds/${soundId}`, {
         method: "DELETE"
     })
-    .then(response => response.json())
 }

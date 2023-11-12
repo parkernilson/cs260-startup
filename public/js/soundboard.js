@@ -142,19 +142,30 @@ async function addSoundFromModal() {
   const url = new URL(window.location.href);
   const boardId = url.searchParams.get("board");
 
-  const board = await getSoundboard(username, boardId);
-  const newSounds = [
-    ...board.sounds,
-    {
+  // upload the file
+  try {
+    const soundFileKey = `${username}-${uuid()}`
+    await uploadFile(file, soundFileKey)
+    // const { url } = await fetch(`/api/${username}/upload-sound`, {
+    //   method: "POST",
+    //   body: {
+    //     soundFile: file
+    //   }
+    // }).then(response => response.json())
+
+    await addSoundToBoard(username, boardId, {
       id: uuid(),
-      color: color,
-      name: name,
-      url: "https://defaulturl.com",
-      filename: file?.name ?? "default-filename.mp3",
-    },
-  ];
-  await setSoundsOnBoard(username, board.id, newSounds);
-  renderSoundboardPage();
+      name,
+      filename: file.name,
+      color,
+      url: `https://storyteller-sounds.s3.us-east-1.amazonaws.com/${soundFileKey}`
+    })
+
+    renderSoundboardPage();
+  } catch(error) {
+    console.error(error)
+  }
+
 }
 
 /**

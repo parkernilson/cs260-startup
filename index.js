@@ -1,7 +1,17 @@
 const { getDefaultUserInfo } = require("./backend/utils");
 const express = require("express");
+// const fileUpload = require('express-fileupload')
+// const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
+// const { fromCognitoIdentityPool } = require("@aws-sdk/credential-providers")
+// const { v4: uuid } = require('uuid')
 
 const app = express();
+// const s3 = new S3Client({
+//   region: 'us-east-1',
+//   credentials: fromCognitoIdentityPool({
+//     identityPoolId: "us-east-1:ecb041b7-1150-478e-b82a-becb32d12f6f"
+//   })
+// })
 
 // The service port. In production the front-end code is statically hosted by the service on the same port.
 const port = process.argv.length > 2 ? process.argv[2] : 3000;
@@ -15,6 +25,10 @@ app.use(express.static("public"));
 // Router for service endpoints
 const apiRouter = express.Router();
 app.use(`/api`, apiRouter);
+
+// apiRouter.use(fileUpload({
+//   limits: { fileSize: 50 * 1024 * 1024 }
+// }))
 
 apiRouter.post("/:username/login", (req, res) => {
   const username = req.params.username;
@@ -174,6 +188,28 @@ apiRouter.delete("/:username/boards/:boardId/sounds/:soundId", (req, res) => {
 
   return res.sendStatus(204)
 });
+
+// apiRouter.post('/:username/upload-sound', async (req, res) => {
+//   const file = req.files.soundFile
+//   const username = req.params.username
+//   const key = `${username}-${uuid()}`
+
+//   const putObject = new PutObjectCommand({
+//     Bucket: "storyteller-sounds",
+//     Key: key,
+//     Body: file
+//   })
+
+//   try {
+//     await s3.send(putObject)
+
+//     return res.send(201).json({
+//       url: `https://storyteller-sounds.s3.us-east-1.amazonaws.com/${key}`
+//     })
+//   } catch(error) {
+//     return res.status(500).json({message: error.message})
+//   }
+// })
 
 // Return the application's default page if the path is unknown
 app.use((_req, res) => {
