@@ -146,12 +146,6 @@ async function addSoundFromModal() {
   try {
     const soundFileKey = `${username}-${uuid()}`
     await uploadFile(file, soundFileKey)
-    // const { url } = await fetch(`/api/${username}/upload-sound`, {
-    //   method: "POST",
-    //   body: {
-    //     soundFile: file
-    //   }
-    // }).then(response => response.json())
 
     await addSoundToBoard(username, boardId, {
       id: uuid(),
