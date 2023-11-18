@@ -69,18 +69,15 @@ async function createBoardFromModal() {
     if (!selectedIcon) throw new Error('An icon must be selected to create a new soundboard')
 
     const username = getCurrentUser()
+    const newBoard = await addSoundBoard(username, {
+      title: newTitle,
+      icon: selectedIcon.value,
+      sounds: []
+    })
+    
     const boards = await getSoundBoards(username)
-    const newBoards = [
-      ...boards,
-      {
-        id: uuid(),
-        title: newTitle,
-        icon: selectedIcon.value,
-        sounds: []
-      }
-    ]
-    await setSoundBoards(username, newBoards)
-    renderBoards(newBoards)
+
+    renderBoards(boards)
 }
 
 async function removeBoard(boardId) {
