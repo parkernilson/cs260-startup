@@ -98,3 +98,9 @@ down the code shipped by tailwind to the client and it will load much faster!
 - **Provides backend endpoints for interacting with the database:** I converted all of my endpoints to use the database to persist data
 - **Stores application data in DB:** All application data is stored in the database
 - **BONUS:** I wasn't able to get the file upload to work in the last deliverable, but I fixed it in this deliverable, so the file upload is working and the urls to the sound files are stored in the database, while the sound files are stored in Amazon S3.
+
+## Login Deliverable
+- **Supports new user registration** Users can register with the register button
+- **Supports existing user authentication** Users can log in with username and password
+- **Stores and retrieves credentials in Mongo DB** The credentials are salted and stored in the mongo db
+- **Restricts access when not logged in** All of the pages with user info on them are protected by checking if the user's token matches the session token
