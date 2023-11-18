@@ -14,6 +14,18 @@ async function getSoundBoards(username) {
         .then(data => data.boards)
 }
 
+async function addSoundBoard(username, board) {
+    return fetch(`/api/${username}/boards/add`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ board })
+    })
+        .then(response => response.json())
+        .then(data => data.board)
+}
+
 /**
  * @returns {Promise<Board[]>}
  */
@@ -52,8 +64,11 @@ async function setSoundsOnBoard(username, boardId, sounds) {
  */
 async function addSoundToBoard(username, boardId, sound) {
     return fetch(`/api/${username}/boards/${boardId}/sounds/add`, {
-        method: "PUT",
-        body: { sound }
+        method: "POST",
+        headers: {
+            'Content-Type': "application/json"
+        },
+        body: JSON.stringify({ sound })
     })
     .then(response => response.json())
     .then(data => data.sound)
