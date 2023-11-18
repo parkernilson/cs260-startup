@@ -1,7 +1,11 @@
 const { getDefaultUserInfo } = require("./public/backend/utils");
 const express = require("express");
-const { getDB } = require("./database");
+const { getDB, getUser, getUserByToken, createUser } = require("./database");
 const { v4: uuid } = require('uuid')
+const cookieParser = require('cookie-parser')
+const bcrypt = require('bcrypt')
+
+const AUTH_COOKIE_NAME = 'storyteller-token'
 
 const app = express();
 
@@ -11,25 +15,61 @@ const port = process.argv.length > 2 ? process.argv[2] : 4000;
 // JSON body parsing using built-in middleware
 app.use(express.json());
 
+app.use(cookieParser())
+
 // Serve up the front-end static content hosting
 app.use(express.static("public"));
+
+app.set('trust proxy', true)
 
 // Router for service endpoints
 const apiRouter = express.Router();
 app.use(`/api`, apiRouter);
 
-apiRouter.post("/:username/login", async (req, res) => {
-  const username = req.params.username;
-  if (!username) throw new Error("A username is required to log in");
+// CreateAuth token for a new user
+apiRouter.post('/auth/create', async (req, res) => {
+  if (await getUser(req.body.username)) {
+    res.status(409).send({ msg: 'Existing user' });
+  } else {
+    const user = await createUser(req.body.username, req.body.password);
 
-  const db = await getDB();
-  let user = await db.collection("users").findOne({ username });
+    // Set the cookie
+    setAuthCookie(res, user.token);
 
-  if (!user) {
-    user = await db.collection("users").insertOne(getDefaultUserInfo(username));
+    res.send({
+      id: user._id,
+    });
   }
+});
 
-  res.status(200).json(user);
+// GetAuth token for the provided credentials
+apiRouter.post('/auth/login', async (req, res) => {
+  const user = await getUser(req.body.username);
+  if (user) {
+    if (await bcrypt.compare(req.body.password, user.password)) {
+      setAuthCookie(res, user.token);
+      res.send({ id: user._id });
+      return;
+    }
+  }
+  res.status(401).send({ msg: 'Unauthorized' });
+});
+
+// DeleteAuth token if stored in cookie
+apiRouter.delete('/auth/logout', (_req, res) => {
+  res.clearCookie(authCookieName);
+  res.status(204).end();
+});
+
+// GetUser returns information about a user
+apiRouter.get('/user/:username', async (req, res) => {
+  const user = await getUser(req.params.username);
+  if (user) {
+    const token = req?.cookies.token;
+    res.send({ username: user.username, authenticated: token === user.token });
+    return;
+  }
+  res.status(404).send({ msg: 'Unknown' });
 });
 
 apiRouter.get("/:username/boards", async (req, res) => {
@@ -40,6 +80,14 @@ apiRouter.get("/:username/boards", async (req, res) => {
 
   if (!user)
     return res.status(404).json({ message: "That user cannot be found" });
+
+  const token = req.cookies?.[AUTH_COOKIE_NAME]
+
+  if (!token)
+    return res.status(401).send({ message: "You are not logged in" })
+  if (token !== user?.token)
+    return res.status(401).json({ message: "You are unauthorized to perform this action" })
+
   if (!user.boards)
     return res.status(500).json({
       message: "An internal server error has occurred. Please try again later",
@@ -55,6 +103,14 @@ apiRouter.get("/:username/boards/:boardId", async (req, res) => {
 
   if (!user)
     return res.status(404).json({ message: "That user cannot be found" });
+
+  const token = req.cookies?.[AUTH_COOKIE_NAME]
+
+  if (!token)
+    return res.status(401).send({ message: "You are not logged in" })
+  if (token !== user?.token)
+    return res.status(401).json({ message: "You are unauthorized to perform this action" })
+
   if (!user?.boards)
     return res.status(500).json({
       message: "An internal server error has occurred. Please try again later",
@@ -74,6 +130,14 @@ apiRouter.post("/:username/boards/set", async (req, res) => {
 
   if (!user)
     return res.status(404).json({ message: "That user cannot be found" });
+
+  const token = req.cookies?.[AUTH_COOKIE_NAME]
+
+  if (!token)
+    return res.status(401).send({ message: "You are not logged in" })
+  if (token !== user?.token)
+    return res.status(401).json({ message: "You are unauthorized to perform this action" })
+
   if (!user?.boards)
     return res.status(500).json({
       message: "An internal server error has occurred. Please try again later",
@@ -100,10 +164,16 @@ apiRouter.post("/:username/boards/add", async (req, res) => {
   const db = await getDB();
   const user = await db.collection("users").findOne({ username });
 
-  console.log(req.body)
-
   if (!user)
     return res.status(404).json({ message: "That user cannot be found" });
+
+  const token = req.cookies?.[AUTH_COOKIE_NAME]
+
+  if (!token)
+    return res.status(401).send({ message: "You are not logged in" })
+  if (token !== user?.token)
+    return res.status(401).json({ message: "You are unauthorized to perform this action" })
+
   if (!user?.boards)
     return res.status(500).json({
       message: "An internal server error has occurred. Please try again later",
@@ -129,6 +199,14 @@ apiRouter.delete("/:username/boards/:boardId", async (req, res) => {
 
   if (!user)
     return res.status(404).json({ message: "That user cannot be found" });
+
+  const token = req.cookies?.[AUTH_COOKIE_NAME]
+
+  if (!token)
+    return res.status(401).send({ message: "You are not logged in" })
+  if (token !== user?.token)
+    return res.status(401).json({ message: "You are unauthorized to perform this action" })
+
   if (!user?.boards)
     return res.status(500).json({
       message: "An internal server error has occurred. Please try again later",
@@ -149,6 +227,14 @@ apiRouter.post("/:username/boards/:boardId/sounds/set", async (req, res) => {
 
   if (!user)
     return res.status(404).json({ message: "That user cannot be found" });
+
+  const token = req.cookies?.[AUTH_COOKIE_NAME]
+
+  if (!token)
+    return res.status(401).send({ message: "You are not logged in" })
+  if (token !== user?.token)
+    return res.status(401).json({ message: "You are unauthorized to perform this action" })
+
   if (!user?.boards)
     return res.status(500).json({
       message: "An internal server error has occurred. Please try again later",
@@ -186,6 +272,14 @@ apiRouter.post("/:username/boards/:boardId/sounds/add", async (req, res) => {
 
   if (!user)
     return res.status(404).json({ message: "That user cannot be found" });
+
+  const token = req.cookies?.[AUTH_COOKIE_NAME]
+
+  if (!token)
+    return res.status(401).send({ message: "You are not logged in" })
+  if (token !== user?.token)
+    return res.status(401).json({ message: "You are unauthorized to perform this action" })
+
   if (!user?.boards)
     return res.status(500).json({
       message: "An internal server error has occurred. Please try again later",
@@ -225,6 +319,14 @@ apiRouter.delete(
 
     if (!user)
       return res.status(404).json({ message: "That user cannot be found" });
+
+    const token = req.cookies?.[AUTH_COOKIE_NAME]
+
+    if (!token)
+      return res.status(401).send({ message: "You are not logged in" })
+    if (token !== user?.token)
+      return res.status(401).json({ message: "You are unauthorized to perform this action" })
+
     if (!user?.boards)
       return res.status(500).json({
         message:
@@ -258,6 +360,15 @@ apiRouter.delete(
 app.use((_req, res) => {
   res.sendFile("index.html", { root: "public" });
 });
+
+// setAuthCookie in the HTTP response
+const setAuthCookie = (res, authToken) => {
+  res.cookie(AUTH_COOKIE_NAME, authToken, {
+    secure: true,
+    httpOnly: true,
+    sameSite: 'strict',
+  });
+}
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
