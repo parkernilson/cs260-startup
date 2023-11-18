@@ -22,6 +22,7 @@ mkdir dist
 cp -r public dist
 cp *.json dist
 cp *.js dist
+cp -r keys dist
 
 # Step 2
 printf "\n----> Clearing out previous distribution on the target\n"

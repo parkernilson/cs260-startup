@@ -92,3 +92,9 @@ down the code shipped by tailwind to the client and it will load much faster!
 - **Front end calls third party endpoints:** My plan was to use an AWS s3 bucket to host the sound files for sound boards, but I couldn't get it to work in the browser. I tried debugging it for like 5 hours, and kept getting a weird error. I ran out of time to get it to work, so I ended up putting a random quote on the about page that I get by calling an external api. I plan on getting the s3 bucket thing to work (or use a different service) for the next deliverable.
 - **Backend service endpoints:** My backend now performs all of the CRUD operations on sound boards and sounds through express endpoints
 - **Frontend calls endpoints:** My frontend calls the endpoints to get sound boards and sounds / update them / delete them
+
+## DB Deliverable
+- **MongoDB Atlas Database:** I set up a mongodb atlas account and hooked it up to my startup application
+- **Provides backend endpoints for interacting with the database:** I converted all of my endpoints to use the database to persist data
+- **Stores application data in DB:** All application data is stored in the database
+- **BONUS:** I wasn't able to get the file upload to work in the last deliverable, but I fixed it in this deliverable, so the file upload is working and the urls to the sound files are stored in the database, while the sound files are stored in Amazon S3.
