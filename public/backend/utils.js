@@ -1,8 +1,7 @@
 const { v4: uuid } = require('uuid')
 
-function getDefaultUserInfo(username) {
+function getDefaultUserInfo() {
     return {
-        username,
         boards: [
             {
                 id: uuid(),
