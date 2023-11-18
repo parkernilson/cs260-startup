@@ -8,7 +8,10 @@ async function uploadFile(file, key) {
     const s3 = new S3Client({
         region: "us-east-1",
         credentials: fromCognitoIdentityPool({
-            identityPoolId: "us-east-1:ecb041b7-1150-478e-b82a-becb32d12f6f"
+            identityPoolId: "us-east-1:ecb041b7-1150-478e-b82a-becb32d12f6f",
+            clientConfig: {
+                region: "us-east-1"
+            }
         })
     })
     const putObject = new PutObjectCommand({
