@@ -1,17 +1,9 @@
 const { getDefaultUserInfo } = require("./public/backend/utils");
 const express = require("express");
-// const fileUpload = require('express-fileupload')
-// const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
-// const { fromCognitoIdentityPool } = require("@aws-sdk/credential-providers")
-// const { v4: uuid } = require('uuid')
+const { getDB } = require("./database");
+const { v4: uuid } = require('uuid')
 
 const app = express();
-// const s3 = new S3Client({
-//   region: 'us-east-1',
-//   credentials: fromCognitoIdentityPool({
-//     identityPoolId: "us-east-1:ecb041b7-1150-478e-b82a-becb32d12f6f"
-//   })
-// })
 
 // The service port. In production the front-end code is statically hosted by the service on the same port.
 const port = process.argv.length > 2 ? process.argv[2] : 4000;
@@ -26,51 +18,63 @@ app.use(express.static("public"));
 const apiRouter = express.Router();
 app.use(`/api`, apiRouter);
 
-// apiRouter.use(fileUpload({
-//   limits: { fileSize: 50 * 1024 * 1024 }
-// }))
-
-apiRouter.post("/:username/login", (req, res) => {
+apiRouter.post("/:username/login", async (req, res) => {
   const username = req.params.username;
-  if (!db[username]) {
-    db[username] = getDefaultUserInfo();
+  if (!username) throw new Error("A username is required to log in");
+
+  const db = await getDB();
+  let user = await db.collection("users").findOne({ username });
+
+  if (!user) {
+    user = await db.collection("users").insertOne(getDefaultUserInfo(username));
   }
 
-  res.status(200).json(db[username]);
+  res.status(200).json(user);
 });
 
-apiRouter.get("/:username/boards", (req, res) => {
-  const username = req.params.username
-  if (!db[username])
-    return res.status(404).json({ message: "That user cannot be found" });
-  if (!db[username]?.boards)
-    return res.status(500).json({
-      message: "An internal server error has occurred. Please try again later",
-    });
-  return res.status(200).json(db[username]);
-});
+apiRouter.get("/:username/boards", async (req, res) => {
+  const db = await getDB();
+  const user = await db
+    .collection("users")
+    .findOne({ username: req.params.username });
 
-apiRouter.get("/:username/boards/:boardId", (req, res) => {
-  const username = req.params.username
-  if (!db[username])
+  if (!user)
     return res.status(404).json({ message: "That user cannot be found" });
-  if (!db[username]?.boards)
+  if (!user.boards)
     return res.status(500).json({
       message: "An internal server error has occurred. Please try again later",
     });
 
-  const boards = db[username].boards;
+  return res.status(200).json({ boards: user.boards });
+});
+
+apiRouter.get("/:username/boards/:boardId", async (req, res) => {
+  const username = req.params.username;
+  const db = await getDB();
+  const user = await db.collection("users").findOne({ username });
+
+  if (!user)
+    return res.status(404).json({ message: "That user cannot be found" });
+  if (!user?.boards)
+    return res.status(500).json({
+      message: "An internal server error has occurred. Please try again later",
+    });
+
+  const boards = user.boards;
   const boardId = req.params.boardId;
   const board = boards.find((b) => b.id === boardId);
 
   return res.status(200).json({ board });
 });
 
-apiRouter.post("/:username/boards/set", (req, res) => {
-  const username = req.params.username
-  if (!db[username])
+apiRouter.post("/:username/boards/set", async (req, res) => {
+  const username = req.params.username;
+  const db = await getDB();
+  const user = await db.collection("users").findOne({ username });
+
+  if (!user)
     return res.status(404).json({ message: "That user cannot be found" });
-  if (!db[username]?.boards)
+  if (!user?.boards)
     return res.status(500).json({
       message: "An internal server error has occurred. Please try again later",
     });
@@ -79,16 +83,28 @@ apiRouter.post("/:username/boards/set", (req, res) => {
       .status(400)
       .json({ message: "Invalid request body. Boards are required" });
 
-  db[username].boards = req.body.boards;
+  await db.collection("users").updateOne(
+    { username },
+    {
+      $set: {
+        boards: req.body.boards,
+      },
+    }
+  );
 
-  return res.status(201).json({ boards: db[username].boards });
+  return res.status(201).json({ boards: req.body.boards });
 });
 
-apiRouter.put("/:username/boards/add", (req, res) => {
-  const username = req.params.username
-  if (!db[username])
+apiRouter.post("/:username/boards/add", async (req, res) => {
+  const username = req.params.username;
+  const db = await getDB();
+  const user = await db.collection("users").findOne({ username });
+
+  console.log(req.body)
+
+  if (!user)
     return res.status(404).json({ message: "That user cannot be found" });
-  if (!db[username]?.boards)
+  if (!user?.boards)
     return res.status(500).json({
       message: "An internal server error has occurred. Please try again later",
     });
@@ -99,32 +115,41 @@ apiRouter.put("/:username/boards/add", (req, res) => {
 
   const newBoard = { ...req.body.board, id: uuid() };
 
-  db[username].boards.push(newBoard);
+  await db
+    .collection("users")
+    .updateOne({ username }, { $push: { boards: newBoard } });
 
-  return res.status(201).json(newBoard);
+  return res.status(201).json({ board: newBoard });
 });
 
-apiRouter.delete("/:username/boards/:boardId", (req, res) => {
-  const username = req.params.username
-  if (!db[username])
+apiRouter.delete("/:username/boards/:boardId", async (req, res) => {
+  const username = req.params.username;
+  const db = await getDB();
+  const user = await db.collection("users").findOne({ username });
+
+  if (!user)
     return res.status(404).json({ message: "That user cannot be found" });
-  if (!db[username]?.boards)
+  if (!user?.boards)
     return res.status(500).json({
       message: "An internal server error has occurred. Please try again later",
     });
 
   const boardId = req.params.boardId;
-  const newBoards = db[username].boards.filter((b) => b.id !== boardId);
-  db[username].boards = newBoards;
+  await db
+    .collection("users")
+    .updateOne({ username }, { $pull: { boards: { id: boardId } } });
 
   return res.sendStatus(204);
 });
 
-apiRouter.post("/:username/boards/:boardId/sounds/set", (req, res) => {
-  const username = req.params.username
-  if (!db[username])
+apiRouter.post("/:username/boards/:boardId/sounds/set", async (req, res) => {
+  const username = req.params.username;
+  const db = await getDB();
+  const user = await db.collection("users").findOne({ username });
+
+  if (!user)
     return res.status(404).json({ message: "That user cannot be found" });
-  if (!db[username]?.boards)
+  if (!user?.boards)
     return res.status(500).json({
       message: "An internal server error has occurred. Please try again later",
     });
@@ -134,23 +159,34 @@ apiRouter.post("/:username/boards/:boardId/sounds/set", (req, res) => {
       .json({ message: "Invalid request: sounds are required" });
 
   const boardId = req.params.boardId;
-  const board = db[username].boards.find((b) => b.id === boardId);
+  const board = user.boards.find((b) => b.id === boardId);
 
   if (!board)
     return res.status(404).json({ message: "That board does not exist" });
 
-  board.sounds = req.body.sounds;
-  db[username].boards[db[username].boards.findIndex((b) => b.id === boardId)] =
-    board;
+  await db.collection("users").updateOne(
+    { username },
+    { $set: { "boards.$[b].sounds": req.body.sounds } },
+    {
+      arrayFilters: [
+        {
+          b: { id: boardId },
+        },
+      ],
+    }
+  );
 
-  return res.status(201).json({ sounds: board.sounds });
+  return res.status(201).json({ sounds: req.body.sounds });
 });
 
-apiRouter.put("/:username/boards/:boardId/sounds/add", (req, res) => {
-  const username = req.params.username
-  if (!db[username])
+apiRouter.post("/:username/boards/:boardId/sounds/add", async (req, res) => {
+  const username = req.params.username;
+  const db = await getDB();
+  const user = await db.collection("users").findOne({ username });
+
+  if (!user)
     return res.status(404).json({ message: "That user cannot be found" });
-  if (!db[username]?.boards)
+  if (!user?.boards)
     return res.status(500).json({
       message: "An internal server error has occurred. Please try again later",
     });
@@ -160,56 +196,63 @@ apiRouter.put("/:username/boards/:boardId/sounds/add", (req, res) => {
       .json({ message: "Invalid request: sound is required" });
 
   const boardId = req.params.boardId;
-  const boardIndex = db[username].boards.findIndex((b) => b.id === boardId);
-  const board = db[username].boards[boardIndex];
 
-  board.sounds.push(req.body.sound);
-  db[username].boards[boardIndex].sounds = board.sounds;
+  const result = await db.collection("users").updateOne(
+    { username },
+    {
+      $push: {
+        "boards.$[b].sounds": req.body.sound,
+      },
+    },
+    {
+      arrayFilters: [
+        {
+          "b.id": boardId
+        }
+      ]
+    }
+  );
 
   return res.status(201).json({ sound: req.body.sound });
 });
 
-apiRouter.delete("/:username/boards/:boardId/sounds/:soundId", (req, res) => {
-  const username = req.params.username
-  if (!db[username])
-    return res.status(404).json({ message: "That user cannot be found" });
-  if (!db[username]?.boards)
-    return res.status(500).json({
-      message: "An internal server error has occurred. Please try again later",
-    });
+apiRouter.delete(
+  "/:username/boards/:boardId/sounds/:soundId",
+  async (req, res) => {
+    const username = req.params.username;
+    const db = await getDB();
+    const user = await db.collection("users").findOne({ username });
 
-  const boardIndex = db[username].boards.findIndex(
-    (b) => b.id === req.params.boardId
-  );
-  const newSounds = db[username].boards[boardIndex].sounds.filter(
-    (s) => s.id !== req.params.soundId
-  );
-  db[username].boards[boardIndex].sounds = newSounds
+    if (!user)
+      return res.status(404).json({ message: "That user cannot be found" });
+    if (!user?.boards)
+      return res.status(500).json({
+        message:
+          "An internal server error has occurred. Please try again later",
+      });
 
-  return res.sendStatus(204)
-});
+    const boardId = req.params.boardId;
+    const soundId = req.params.soundId;
 
-// apiRouter.post('/:username/upload-sound', async (req, res) => {
-//   const file = req.files.soundFile
-//   const username = req.params.username
-//   const key = `${username}-${uuid()}`
+    await db.collection("users").updateOne(
+      { username },
+      {
+        $pull: {
+          "boards.$[b].sounds": { id: soundId },
+        },
+      },
+      {
+        arrayFilters: [
+          {
+            "b.id": boardId
+          }
+        ]
+      }
+    );
 
-//   const putObject = new PutObjectCommand({
-//     Bucket: "storyteller-sounds",
-//     Key: key,
-//     Body: file
-//   })
-
-//   try {
-//     await s3.send(putObject)
-
-//     return res.send(201).json({
-//       url: `https://storyteller-sounds.s3.us-east-1.amazonaws.com/${key}`
-//     })
-//   } catch(error) {
-//     return res.status(500).json({message: error.message})
-//   }
-// })
+    return res.sendStatus(204);
+  }
+);
 
 // Return the application's default page if the path is unknown
 app.use((_req, res) => {
@@ -219,10 +262,3 @@ app.use((_req, res) => {
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
 });
-
-/**
- * @type {DB}
- */
-let db = {
-  defaultuser: getDefaultUserInfo()
-};
